@@ -20,9 +20,9 @@
 
 #define GENERATION_SIZE 30
 #define MUTATION_RATE 0.01
-#define MUTATION_AMOUNT 0.3
-#define SELECTION_CUTOFF 0.15
-#define POLYGONS 50
+#define MUTATION_AMOUNT 0.1
+#define SELECTION_CUTOFF 0.25
+#define POLYGONS 10
 #define RENDER_W 200
 #define RENDER_H 200
 
@@ -545,7 +545,7 @@ int main(int argc, char **argv) {
 
   while(!glfwWindowShouldClose(window)) {
 	evolve(gen, n++);
-	if (n % 1000 == 0) {
+	if (n % 100 == 0) {
 	  save_jpg(gen, n);
 	}
   }

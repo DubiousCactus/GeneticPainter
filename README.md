@@ -9,3 +9,8 @@ The main goal of this project was to experiment with different parameters and
 find a good way to encode pictures into DNA strings, therefore the performance
 is quite poor.
 
+### Usage
+
+Compile with `gcc -o genetic_painter genetic_painter.c -lGL -lGLEW -lglut -lglfw -lm -O3` and simply run it as `./genetic_painter <img.png>`.
+
+You may want to change the hyperparameters defined in the source as your liking.
