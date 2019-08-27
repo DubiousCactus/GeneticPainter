@@ -160,12 +160,12 @@ void draw(Chromosome *c)
 void save_jpg(Generation *gen, int n)
 {
   unsigned char frame[3*RENDER_W*RENDER_H];
-  char name[100];
-  sprintf(name, "generation-%d_fittest_score-%ld.jpg", n, gen->fittest->score);
+  char name[25];
+  sprintf(name, "generation-%09d.jpg", n);
   draw(gen->fittest);
   glReadPixels(0, 0, RENDER_W, RENDER_H, GL_RGB, GL_UNSIGNED_BYTE, &frame[0]);
   stbi_write_jpg(name, RENDER_W, RENDER_H, 3, frame, 100);
-  printf("Saved the fittest chromosome as '%s'", name);
+  printf("Saved the fittest chromosome as '%s'\n", name);
 }
 
 
