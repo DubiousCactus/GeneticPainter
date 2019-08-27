@@ -18,10 +18,10 @@
 #include "stb_image.h"
 #include "stb_image_write.h"
 
-#define GENERATION_SIZE 50
+#define GENERATION_SIZE 100
 #define MUTATION_RATE 0.01
-#define MUTATION_AMOUNT 0.15
-#define SELECTION_CUTOFF 0.15
+#define MUTATION_AMOUNT 0.5
+#define SELECTION_CUTOFF 0.25
 #define POLYGONS 300
 #define RENDER_W 200
 #define RENDER_H 200
