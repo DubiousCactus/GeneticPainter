@@ -18,11 +18,11 @@
 #include "stb_image.h"
 #include "stb_image_write.h"
 
-#define GENERATION_SIZE 30
+#define GENERATION_SIZE 50
 #define MUTATION_RATE 0.01
-#define MUTATION_AMOUNT 0.1
-#define SELECTION_CUTOFF 0.25
-#define POLYGONS 10
+#define MUTATION_AMOUNT 0.15
+#define SELECTION_CUTOFF 0.15
+#define POLYGONS 300
 #define RENDER_W 200
 #define RENDER_H 200
 
@@ -91,38 +91,42 @@ void make_vertex(Vertex *v, float x, float y)
 }
 
 
-GLuint make_vao(Triangle *triangles, int length)
+void draw(Chromosome *c)
 {
+  /*GLuint vao = make_vao(c->genes, POLYGONS);*/
+  //
   GLuint vbo, vao, colorBuffer;
 
-  float points[length*3*3]; // 3 coordinates * 3 vertices
-  float colors[length*4*3]; // 4 color channels (RGBA) * 3 vertices
+  float points[POLYGONS*3*3]; // 3 coordinates * 3 vertices
+  float colors[POLYGONS*4*3]; // 4 color channels (RGBA) * 3 vertices
 
-  for (int i = 0, n = 0; i < length*3*3; i += 9, n++) {
+  for (int i = 0, n = 0; i < POLYGONS*3*3; i += 9, n++) {
     for (int j = 0; j < 9; j += 3) {
-      points[i+j] = triangles[n].vertices[j/3].x;
-      points[i+(j+1)] = triangles[n].vertices[j/3].y;
+      points[i+j] = c->genes[n].vertices[j/3].x;
+      points[i+(j+1)] = c->genes[n].vertices[j/3].y;
       points[i+(j+2)] = 0;
     }
   }
 
-  for (int i = 0, n = 0; i < length*3*4; i += 12, n++) {
+  for (int i = 0, n = 0; i < POLYGONS*3*4; i += 12, n++) {
     for (int j = 0; j < 12; j += 4) {
-      colors[i+j] = triangles[n].color.r;
-      colors[i+(j+1)] = triangles[n].color.g;
-      colors[i+(j+2)] = triangles[n].color.b;
-      colors[i+(j+3)] = triangles[n].color.a;
+      colors[i+j] = c->genes[n].color.r;
+      colors[i+(j+1)] = c->genes[n].color.g;
+      colors[i+(j+2)] = c->genes[n].color.b;
+      colors[i+(j+3)] = c->genes[n].color.a;
     }
   }
 
   vbo = vao = colorBuffer = 0;
   glGenBuffers(1, &vbo);
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, length * 3 * 3 * sizeof(float), points, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, POLYGONS * 3 * 3 * sizeof(float), points,
+      GL_STATIC_DRAW);
 
   glGenBuffers(1, &colorBuffer);
   glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
-  glBufferData(GL_ARRAY_BUFFER, length * 4 * 3 * sizeof(float), colors, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, POLYGONS * 4 * 3 * sizeof(float), colors,
+      GL_STATIC_DRAW);
 
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
@@ -133,14 +137,6 @@ GLuint make_vao(Triangle *triangles, int length)
   glEnableVertexAttribArray(1);
   glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
   glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, NULL);
-
-  return vao;
-}
-
-
-void draw(Chromosome *c)
-{
-  GLuint vao = make_vao(c->genes, POLYGONS);
 
 
   // wipe the drawing surface clear
@@ -154,6 +150,10 @@ void draw(Chromosome *c)
   glfwPollEvents();
   // put the stuff we've been drawing onto the display
   glfwSwapBuffers(window);
+
+  glDeleteBuffers(1, &vbo);
+  glDeleteBuffers(1, &colorBuffer);
+  glDeleteVertexArrays(1, &vao);
 }
 
 
@@ -161,7 +161,7 @@ void save_jpg(Generation *gen, int n)
 {
   unsigned char frame[3*RENDER_W*RENDER_H];
   char name[100];
-  sprintf(name, "generation-%d_fittest_score-%ld.png", n, gen->fittest->score);
+  sprintf(name, "generation-%d_fittest_score-%ld.jpg", n, gen->fittest->score);
   draw(gen->fittest);
   glReadPixels(0, 0, RENDER_W, RENDER_H, GL_RGB, GL_UNSIGNED_BYTE, &frame[0]);
   stbi_write_jpg(name, RENDER_W, RENDER_H, 3, frame, 100);
@@ -196,7 +196,7 @@ void compute_fitness(Generation *g, Chromosome *c)
 
   float normalizedScore = (c->score - g->minScore) / (g->maxScore - g->minScore);
 
-  c->fitness =  abs(normalizedScore - 1);
+  c->fitness = abs(normalizedScore - 1);
 }
 
 
